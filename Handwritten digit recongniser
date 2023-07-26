@@ -1,0 +1,209 @@
+# This is done using Kaggle dataset @ https://www.kaggle.com/competitions/digit-recognizer?rvi=1
+
+# This Python 3 environment comes with many helpful analytics libraries installed
+# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python
+# For example, here's several helpful packages to load
+​
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+​
+# Input data files are available in the read-only "../input/" directory
+# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory
+​
+import os
+for dirname, _, filenames in os.walk('/kaggle/input'):
+    for filename in filenames:
+        print(os.path.join(dirname, filename))
+​
+# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using "Save & Run All" 
+# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session
+/kaggle/input/digit-recognizer/sample_submission.csv
+/kaggle/input/digit-recognizer/train.csv
+/kaggle/input/digit-recognizer/test.csv
+add Codeadd Markdown
+Import necessary libraries
+add Codeadd Markdown
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.utils import to_categorical
+import matplotlib.pyplot as plt
+%matplotlib inline
+add Codeadd Markdown
+Read and inspect the training data
+add Codeadd Markdown
+X = pd.read_csv("/kaggle/input/digit-recognizer/train.csv")
+add Codeadd Markdown
+X.shape
+(42000, 785)
+add Codeadd Markdown
+np.argmax(X)
+134
+add Codeadd Markdown
+X
+label	pixel0	pixel1	pixel2	pixel3	pixel4	pixel5	pixel6	pixel7	pixel8	...	pixel774	pixel775	pixel776	pixel777	pixel778	pixel779	pixel780	pixel781	pixel782	pixel783
+0	1	0	0	0	0	0	0	0	0	0	...	0	0	0	0	0	0	0	0	0	0
+1	0	0	0	0	0	0	0	0	0	0	...	0	0	0	0	0	0	0	0	0	0
+2	1	0	0	0	0	0	0	0	0	0	...	0	0	0	0	0	0	0	0	0	0
+3	4	0	0	0	0	0	0	0	0	0	...	0	0	0	0	0	0	0	0	0	0
+4	0	0	0	0	0	0	0	0	0	0	...	0	0	0	0	0	0	0	0	0	0
+...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...
+41995	0	0	0	0	0	0	0	0	0	0	...	0	0	0	0	0	0	0	0	0	0
+41996	1	0	0	0	0	0	0	0	0	0	...	0	0	0	0	0	0	0	0	0	0
+41997	7	0	0	0	0	0	0	0	0	0	...	0	0	0	0	0	0	0	0	0	0
+41998	6	0	0	0	0	0	0	0	0	0	...	0	0	0	0	0	0	0	0	0	0
+41999	9	0	0	0	0	0	0	0	0	0	...	0	0	0	0	0	0	0	0	0	0
+42000 rows × 785 columns
+
+add Codeadd Markdown
+Divide into X and y
+
+add Codeadd Markdown
+X_train = X.iloc[:,1:].values
+add Codeadd Markdown
+for digit in X_train:
+    digit = np.array(digit)/255
+add Codeadd Markdown
+Type Markdown and LaTeX:  α2
+ 
+add Codeadd Markdown
+y_train = X.iloc[:, 0:1].values
+add Codeadd Markdown
+y_train = to_categorical(y_train, 10)
+add Codeadd Markdown
+Model fitting
+add Codeadd Markdown
+Model 1: 1 layer and 5 epochs
+
+add Codeadd Markdown
+model = keras.Sequential([
+    
+    keras.layers.Dense(10, activation = "sigmoid")
+])
+​
+model.compile(optimizer = "adam",
+             loss = "categorical_crossentropy",
+             metrics = ["accuracy"])
+​
+model.fit(X_train, y_train, epochs = 5)
+Epoch 1/5
+1313/1313 [==============================] - 3s 2ms/step - loss: 10.5341 - accuracy: 0.8323
+Epoch 2/5
+1313/1313 [==============================] - 2s 2ms/step - loss: 6.1799 - accuracy: 0.8793
+Epoch 3/5
+1313/1313 [==============================] - 2s 2ms/step - loss: 5.5837 - accuracy: 0.8827
+Epoch 4/5
+1313/1313 [==============================] - 2s 2ms/step - loss: 5.2730 - accuracy: 0.8890
+Epoch 5/5
+1313/1313 [==============================] - 2s 2ms/step - loss: 5.1605 - accuracy: 0.8911
+<keras.callbacks.History at 0x7c7336f470d0>
+add Codeadd Markdown
+The accuracy does not even reach 90%
+
+add Codeadd Markdown
+Increase the number of layers
+
+Model 2: 2 layers and 5 epochs
+
+add Codeadd Markdown
+model = keras.Sequential([
+    keras.layers.Dense(100, activation='relu'),
+    keras.layers.Dense(10, activation='sigmoid')
+])
+​
+model.compile(optimizer='adam',
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+​
+model.fit(X_train, y_train, epochs=5)
+Epoch 1/5
+1313/1313 [==============================] - 4s 3ms/step - loss: 3.1646 - accuracy: 0.8340
+Epoch 2/5
+1313/1313 [==============================] - 3s 2ms/step - loss: 0.5028 - accuracy: 0.8861
+Epoch 3/5
+1313/1313 [==============================] - 3s 2ms/step - loss: 0.3586 - accuracy: 0.9100
+Epoch 4/5
+1313/1313 [==============================] - 3s 2ms/step - loss: 0.2904 - accuracy: 0.9224
+Epoch 5/5
+1313/1313 [==============================] - 3s 3ms/step - loss: 0.2482 - accuracy: 0.9327
+<keras.callbacks.History at 0x7c7335c0edd0>
+add Codeadd Markdown
+The accuracy seems to have increased - is there any other way to increase the accuracy?
+
+add Codeadd Markdown
+How about more epochs?
+
+Model 3: 2 layers and 10 epochs
+
+add Codeadd Markdown
+model = keras.Sequential([
+    keras.layers.Dense(100, activation='relu'),
+    keras.layers.Dense(10, activation='sigmoid')
+])
+​
+model.compile(optimizer='adam',
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+​
+model.fit(X_train, y_train, epochs=10)
+Epoch 1/10
+1313/1313 [==============================] - 4s 2ms/step - loss: 3.2018 - accuracy: 0.8185
+Epoch 2/10
+1313/1313 [==============================] - 3s 2ms/step - loss: 0.5131 - accuracy: 0.8786
+Epoch 3/10
+1313/1313 [==============================] - 3s 2ms/step - loss: 0.3641 - accuracy: 0.9076
+Epoch 4/10
+1313/1313 [==============================] - 3s 2ms/step - loss: 0.2867 - accuracy: 0.9262
+Epoch 5/10
+1313/1313 [==============================] - 3s 2ms/step - loss: 0.2536 - accuracy: 0.9327
+Epoch 6/10
+1313/1313 [==============================] - 3s 2ms/step - loss: 0.2357 - accuracy: 0.9379
+Epoch 7/10
+1313/1313 [==============================] - 3s 2ms/step - loss: 0.2188 - accuracy: 0.9432
+Epoch 8/10
+1313/1313 [==============================] - 3s 2ms/step - loss: 0.2088 - accuracy: 0.9461
+Epoch 9/10
+1313/1313 [==============================] - 3s 2ms/step - loss: 0.1875 - accuracy: 0.9505
+Epoch 10/10
+1313/1313 [==============================] - 3s 2ms/step - loss: 0.1752 - accuracy: 0.9533
+<keras.callbacks.History at 0x7c7336ebb1c0>
+add Codeadd Markdown
+The accuracy is a little over 95%. If we can take it a notch higher, that would mean a great model
+
+add Codeadd Markdown
+Model 4: 3 layers and 10 epochs
+
+add Codeadd Markdown
+model = keras.Sequential([
+    keras.layers.Dense(1000, activation='relu'),
+    keras.layers.Dense(500, activation='relu'),
+    keras.layers.Dense(10, activation='sigmoid')
+])
+​
+model.compile(optimizer='adam',
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+​
+model.fit(X_train, y_train, epochs=10)
+Epoch 1/10
+1313/1313 [==============================] - 13s 9ms/step - loss: 1.6817 - accuracy: 0.9054
+Epoch 2/10
+1313/1313 [==============================] - 12s 10ms/step - loss: 0.2111 - accuracy: 0.9484
+Epoch 3/10
+1313/1313 [==============================] - 13s 10ms/step - loss: 0.1886 - accuracy: 0.9515
+Epoch 4/10
+1313/1313 [==============================] - 12s 9ms/step - loss: 0.1699 - accuracy: 0.9570
+Epoch 5/10
+1313/1313 [==============================] - 13s 10ms/step - loss: 0.1541 - accuracy: 0.9600
+Epoch 6/10
+1313/1313 [==============================] - 12s 9ms/step - loss: 0.1454 - accuracy: 0.9634
+Epoch 7/10
+1313/1313 [==============================] - 12s 9ms/step - loss: 0.1406 - accuracy: 0.9660
+Epoch 8/10
+1313/1313 [==============================] - 12s 9ms/step - loss: 0.1350 - accuracy: 0.9682
+Epoch 9/10
+1313/1313 [==============================] - 12s 9ms/step - loss: 0.1181 - accuracy: 0.9722
+Epoch 10/10
+1313/1313 [==============================] - 12s 9ms/step - loss: 0.0876 - accuracy: 0.9774
+<keras.callbacks.History at 0x7c73c9ba5c90>
+add Codeadd Markdown
+This is good. Let's go with the final version
